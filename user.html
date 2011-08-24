@@ -10,7 +10,6 @@
         };
 
         connection.onmessage = function (msg) { 
-          console.log( msg );
           var data = JSON.parse(msg.data);
           var tweet = document.createElement('div');
           tweet.innerHTML = data.text;

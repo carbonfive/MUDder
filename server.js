@@ -9,7 +9,8 @@ var wsServer = ws.createServer({server:app});
 wsServer.addListener("connection", function(user){
   user.say = function(msg) { this.send( JSON.stringify({text:msg}) ) };
   user.room = world['red room'];
-  user.say( user.room.description );
+  var description = world.prop(user.room,'describe')(user.room);
+  user.say( description );
   user.addListener("message", function(msg){
     var command = JSON.parse(msg).text.split(/\s+/);
     world.command(command[0], command[1],user);

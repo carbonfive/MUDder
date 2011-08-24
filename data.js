@@ -2,19 +2,37 @@ var data = module.exports = {
   direction : {
     go : function( direction, user, room ) {
       user.room = data[direction.goes];
-      user.say( user.room.description );
+      var description = prop(user.room,'describe')(user.room);
+      user.say( description );
+    }
+  },
+  room : {
+    describe : function(room) {
+      return room.description;
+    }
+  },
+  monster : {
+    fight : function( monster, user, room, prop ) {
+      delete room[prop];
+      user.say( 'you have defeated the ' + monster.type );
     }
   },
   'red room' : {
-    _is : [],
-    description : "This is a red room",
+    _is : ['room'],
+    description : "This is a red room.",
     north : { _is : ['direction'], goes: 'yellow room' }
   },
   'yellow room' : {
-    _is : [],
-    description : "This is a yellow room",
-    south : { _is : ['direction'], goes: 'red room' }
+    _is : ['room'],
+    describe : function(room) { return room.description + (room.orc ? ' There is an orc here' : ''); },
+    description : "This is a yellow room.",
+    south : { _is : ['direction'], goes: 'red room' },
+    orc : {
+      _is : ['monster'],
+      type : 'orc'
+    }
   }
+
 }
 
 var isA = module.exports.isA = function(obj,type) {
@@ -36,5 +54,5 @@ var command = module.exports.command = function(action,object,user) {
   var command = prop(roomObject,action);
   if ( ! command ) 
     return user.say("You can't "+action+" "+object);
-  command.apply(roomObject, [roomObject, user, user.room]);
+  command.apply(roomObject, [roomObject, user, user.room, object]);
 }
