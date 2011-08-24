@@ -1,22 +1,22 @@
 <html>
   <script language="javascript">
-      var connection = new WebSocket('ws://'+document.location.host);
-      connection.onopen = function() {
-      };
-
-      connection.onmessage = function (msg) { 
-        console.log( msg );
-        var data = JSON.parse(msg.data);
-        var tweet = document.createElement('div');
-        tweet.innerHTML = data.text;
-        el('tweets').appendChild(tweet);
-      };
-
       var user = /\/(\w+)$/.exec(document.location.href)[1];
 
       function el(id) { return document.getElementById(id); }
 
       function init() {
+        var connection = new WebSocket('ws://'+document.location.host);
+        connection.onopen = function() {
+        };
+
+        connection.onmessage = function (msg) { 
+          console.log( msg );
+          var data = JSON.parse(msg.data);
+          var tweet = document.createElement('div');
+          tweet.innerHTML = data.text;
+          el('tweets').appendChild(tweet);
+        };
+
         el('go').onclick = function() {
           connection.send( JSON.stringify({name:user, text:el('tweet').value}) );
           el('tweet').value = '';
