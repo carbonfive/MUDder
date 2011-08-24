@@ -6,6 +6,7 @@
     "socket.io" : "0.6.18",
     "mongodb" : "0.9.6-7",
     "websocket-server" : "1",
+    "twitter-node" : "0",
     "jasmine-node" : "https://github.com/blindsey/jasmine-node/tarball/master"
   }
 }
