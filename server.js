@@ -28,22 +28,32 @@ var twit = new twitter({
   access_token_secret: '7aIcwsgWjvUn2XNci27dcHabMlV1OoYI1LOzMMQ9AA'
 });
 
-var replyCount = 0;
 
+var twitterUsers = {};
+var replyCount = parseInt(Math.random()*1000);
+var noop = function(data) {};
 twit.stream('user', {replies:'all'}, function(stream) {
   stream.on('data', function (data) {
     console.log('Stream Data',data);
 
-    if(data.user && data.text) {
-      if (data.user.name != 'c5mudder') {
-        twit.verifyCredentials(function (data) {
-          console.log('Verify Credentials Data:', data);
-            })
-            .updateStatus("@" + data.user.name + " Thanks for the " + (replyCount++) + "th reply!",
-                          function(data) {
-                            console.log('Update Status Data', data);
-                          });
-      }
+    if(data.user && data.text && data.text.match(/\@c5mudder(\s|$)/) ) {
+      try {
+        var userName = data.user.screen_name;
+        var user = twitterUsers[userName];
+        if ( user == null ) {
+          user = twitterUsers[userName] = {
+            say: function(msg) {
+              twit.verifyCredentials(noop).updateStatus("@" + userName + ' [' + (replyCount++) + '] ' + msg, noop);
+            },
+            room : world['red room']
+          };
+          var description = world.prop(user.room,'describe')(user.room);
+          user.say( description );
+        } else {
+          var command = data.text.split(/\s+/).filter(function(t) { return t.charAt(0) != '@'; });
+          world.command(command[0], command[1], user);
+        }
+      } catch (error) { console.log(error.message, error);  }
     }
   });
 });
