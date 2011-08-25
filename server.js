@@ -11,10 +11,13 @@ var wsServer = ws.createServer({server:app});
 wsServer.addListener("connection", function(user){
   user.say = function(msg) { this.send( JSON.stringify({text:msg}) ) };
   user.room = world['red room'];
-  var description = world.prop(user.room,'describe')(user.room);
+  (world['red room'].players=world['red room'].players||[]).push(user);
+  var description = world.prop(user.room,'describe')(user,user.room);
   user.say( description );
   user.addListener("message", function(msg){
-    var command = JSON.parse(msg).text.split(/\s+/);
+    var data = JSON.parse(msg);
+    user.name = data.name;
+    var command = data.text.split(/\s+/);
     world.command(command[0], command[1],user);
   });
 });
@@ -45,9 +48,11 @@ twit.stream('user', {replies:'all'}, function(stream) {
             say: function(msg) {
               twit.verifyCredentials(noop).updateStatus("@" + userName + ' [' + (replyCount++) + '] ' + msg, noop);
             },
-            room : world['red room']
+            room : world['red room'],
+            name : userName
           };
-          var description = world.prop(user.room,'describe')(user.room);
+          (world['red room'].players=world['red room'].players||[]).push(user);
+          var description = world.prop(user.room,'describe')(user,user.room);
           user.say( description );
         } else {
           var command = data.text.split(/\s+/).filter(function(t) { return t.charAt(0) != '@'; });

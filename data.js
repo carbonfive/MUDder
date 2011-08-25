@@ -1,14 +1,20 @@
 var data = module.exports = {
   direction : {
     go : function( direction, user, room ) {
+      if (user.room.players)
+        user.room.players = user.room.players.filter(function(p) { return p.name !== user.name; });
       user.room = data[direction.goes];
-      var description = prop(user.room,'describe')(user.room);
+      (user.room.players=user.room.players||[]).push(user);
+      var description = prop(user.room,'describe')(user,user.room);
       user.say( description );
     }
   },
   room : {
-    describe : function(room) {
-      return room.description;
+    describe : function(user,room) {
+      var description = room.description;
+      if ( room.players && room.players.length ) 
+        description += ' ' + room.players.filter(function(p){return p!=user;}).map(function(p){return '@'+p.name+' is here.';}).join(' ');
+      return description;
     }
   },
   monster : {
@@ -24,7 +30,13 @@ var data = module.exports = {
   },
   'yellow room' : {
     _is : ['room'],
-    describe : function(room) { return room.description + (room.orc ? ' There is an orc here' : ''); },
+    describe : function(user,room) {
+      var description = room.description;
+      if ( room.players && room.players.length ) 
+        description += ' ' + room.players.filter(function(p){return p!=user;}).map(function(p){return '@'+p.name+' is here.';}).join(' ');
+      description += (room.orc ? ' There is an orc here' : '');
+      return description;
+    },
     description : "This is a yellow room.",
     south : { _is : ['direction'], goes: 'red room' },
     orc : {
