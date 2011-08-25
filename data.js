@@ -12,8 +12,8 @@ var data = module.exports = {
     }
   },
   monster : {
-    fight : function( monster, user, room, prop ) {
-      delete room[prop];
+    fight : function( monster, user, room, propName ) {
+      delete room[propName];
       user.say( 'you have defeated the ' + prop(monster,'type') );
     }
   },
