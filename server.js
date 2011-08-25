@@ -1,7 +1,7 @@
 var express = require('express'),
     ws = require('websocket-server'),
     net = require('net'),
-    TwitterNode = require('twitter-node').TwitterNode,
+    twitter = require('twitter'),
     world = require('./data.js');
 var app = express.createServer()
 
@@ -21,20 +21,29 @@ wsServer.addListener("connection", function(user){
 
 app.listen(8500);
 
-var twit = new TwitterNode({
-  user: 'c5mudder', 
-  password: 'k!11f00z13',
-  track : ['@c5mudder']
+var twit = new twitter({
+  consumer_key: 'QLYnr2siu3su1urO6ucvbg',
+  consumer_secret: 'q4nvQBygO92lZ8vKlpztL8LglXOBKPNLV4dyJ6Tuxw',
+  access_token_key: '361542648-twuS2ovfDqAwqNLnS00bJTFtUxZ8tyM5VhIbA9Ag',
+  access_token_secret: '7aIcwsgWjvUn2XNci27dcHabMlV1OoYI1LOzMMQ9AA'
 });
 
-twit.headers['User-Agent'] = 'mudder';
+var replyCount = 0;
 
-twit.addListener('error', function(error) {
-  console.log(error.message);
+twit.stream('user', {replies:'all'}, function(stream) {
+  stream.on('data', function (data) {
+    console.log('Stream Data',data);
+
+    if(data.user && data.text) {
+      if (data.user.name != 'c5mudder') {
+        twit.verifyCredentials(function (data) {
+          console.log('Verify Credentials Data:', data);
+            })
+            .updateStatus("@" + data.user.name + " Thanks for the " + (replyCount++) + "th reply!",
+                          function(data) {
+                            console.log('Update Status Data', data);
+                          });
+      }
+    }
+  });
 });
-
-twit.addListener('tweet', function(tweet) {
-  console.log("@" + tweet.user.screen_name + ": " + tweet.text);
-});
-
-twit.stream();
